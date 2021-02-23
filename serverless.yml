@@ -1,0 +1,50 @@
+service: start-stop-ec2-instances
+
+frameworkVersion: "2"
+
+provider:
+  name: aws
+  runtime: python3.8
+  lambdaHashingVersion: 20201221
+  region: ap-northeast-1
+
+iamRoleStatements:
+  - Effect: "Allow"
+    Action:
+      - "s3:ListBucket"
+    Resource:
+      {
+        "Fn::Join":
+          ["", ["arn:aws:s3:::", { "Ref": "ServerlessDeploymentBucket" }]],
+      }
+  - Effect: "Allow"
+    Action:
+      - "s3:PutObject"
+    Resource:
+      Fn::Join:
+        - ""
+        - - "arn:aws:s3:::"
+          - "Ref": "ServerlessDeploymentBucket"
+          - "/*"
+  - Effect: "Allow"
+    Action:
+      - "logs:CreateLogStream"
+      - "logs:PutLogEvents"
+    Resource: "arn:aws:logs:*:*:*"
+  - Effect: "Allow"
+    Action:
+      - "ec2:DescribeInstances"
+      - "ec2:StartInstances"
+      - "ec2:StopInstances"
+    Resource: "*"
+
+functions:
+  auto_start_stop:
+    handler: handler.auto_start_stop
+    events:
+      - schedule:
+          name: auto-stop
+          rate: cron(0 23 * * ? *)
+          input:
+            Region: ap-northeast-1
+            Action: stop
