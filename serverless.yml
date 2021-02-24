@@ -7,36 +7,37 @@ provider:
   runtime: python3.8
   lambdaHashingVersion: 20201221
   region: ap-northeast-1
-
-iamRoleStatements:
-  - Effect: "Allow"
-    Action:
-      - "s3:ListBucket"
-    Resource:
-      {
-        "Fn::Join":
-          ["", ["arn:aws:s3:::", { "Ref": "ServerlessDeploymentBucket" }]],
-      }
-  - Effect: "Allow"
-    Action:
-      - "s3:PutObject"
-    Resource:
-      Fn::Join:
-        - ""
-        - - "arn:aws:s3:::"
-          - "Ref": "ServerlessDeploymentBucket"
-          - "/*"
-  - Effect: "Allow"
-    Action:
-      - "logs:CreateLogStream"
-      - "logs:PutLogEvents"
-    Resource: "arn:aws:logs:*:*:*"
-  - Effect: "Allow"
-    Action:
-      - "ec2:DescribeInstances"
-      - "ec2:StartInstances"
-      - "ec2:StopInstances"
-    Resource: "*"
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "s3:ListBucket"
+          Resource:
+            Fn::Join:
+              - ""
+              - - "arn:aws:s3:::"
+                - Ref: ServerlessDeploymentBucket
+        - Effect: "Allow"
+          Action:
+            - "s3:PutObject"
+          Resource:
+            Fn::Join:
+              - ""
+              - - "arn:aws:s3:::"
+                - Ref: ServerlessDeploymentBucket
+                - "/*"
+        - Effect: "Allow"
+          Action:
+            - "logs:CreateLogStream"
+            - "logs:PutLogEvents"
+          Resource: "arn:aws:logs:*:*:*"
+        - Effect: "Allow"
+          Action:
+            - "ec2:DescribeInstances"
+            - "ec2:StartInstances"
+            - "ec2:StopInstances"
+          Resource: "*"
 
 functions:
   auto_start_stop:
